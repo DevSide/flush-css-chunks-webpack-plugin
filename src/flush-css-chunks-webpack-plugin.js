@@ -1,6 +1,8 @@
 const { ConcatSource } = require('webpack-sources');
 const { matchObject } = require('webpack/lib/ModuleFilenameHelpers');
 
+const pluginName = 'flush-css-chunks-webpack-plugin';
+
 function isInitial(chunk) {
   let parentCount = 0;
 
@@ -58,8 +60,8 @@ class FlushCSSChunks {
   }
 
   apply(compiler) {
-    compiler.plugin('compilation', (compilation) => {
-      compilation.plugin('optimize-chunk-assets', (chunks, callback) => {
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.optimizeChunkAssets.tapAsync(pluginName, (chunks, callback) => {
         const { publicPath } = compiler.options.output;
         const { assetsByChunkName } = compilation.getStats().toJson();
 
@@ -76,7 +78,7 @@ class FlushCSSChunks {
           }
 
           if (this.options.entryOnly &&
-            this.options.entries && !this.options.entries.includes(chunk.name)) {
+              this.options.entries && !this.options.entries.includes(chunk.name)) {
             return;
           }
 
