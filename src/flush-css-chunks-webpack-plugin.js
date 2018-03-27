@@ -2,7 +2,13 @@ const { ConcatSource } = require('webpack-sources');
 const { matchObject } = require('webpack/lib/ModuleFilenameHelpers');
 
 function isInitial(chunk) {
-  return chunk.isInitial() || chunk.parents.length === 0;
+  let parentCount = 0;
+
+  for (const chunkGroup of chunk.groupsIterable) {
+    parentCount += chunkGroup.getNumberOfParents();
+  }
+
+  return chunk.isOnlyInitial() || parentCount === 0;
 }
 
 function generateAssetMapping(path, assets) {
